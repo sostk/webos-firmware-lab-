@@ -1,0 +1,36 @@
+name: Inspect official LG firmware packages
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Choose firmware (each runs in its own job to limit disk use)'
+        required: true
+        type: choice
+        options:
+          - c1
+          - c5
+          - c6
+permissions:
+  contents: read
+concurrency:
+  group: firmware-acquisition
+  cancel-in-progress: false
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Download from LG and inspect ZIP without unpacking
+        run: python3 scripts/ci_acquire.py --target "${{ inputs.target }}" --out analysis-output
+      - name: Upload JSON report only
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: firmware-${{ inputs.target }}-metadata
+          path: analysis-output/report.json
+          if-no-files-found: error
+          retention-days: 14
