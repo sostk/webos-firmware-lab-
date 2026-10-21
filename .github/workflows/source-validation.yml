@@ -1,0 +1,31 @@
+name: Validate firmware source manifest
+on:
+  push:
+    paths:
+      - 'configs/**'
+      - 'scripts/download.py'
+      - 'scripts/probe.py'
+      - '.github/workflows/source-validation.yml'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate source records and scripts
+        run: |
+          python -m py_compile scripts/download.py scripts/probe.py
+          python - <<'PY'
+          import json
+          from pathlib import Path
+          d=json.loads(Path("configs/firmware-sources.json").read_text())
+          assert d["schema"]==1
+          assert {x["id"] for x in d["targets"]}=={"c1","c5","c6"}
+          assert all(x["support_page"].startswith("https://") for x in d["targets"])
+          PY
