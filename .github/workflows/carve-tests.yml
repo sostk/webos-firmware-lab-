@@ -1,0 +1,34 @@
+name: Test offline carving
+on:
+  push:
+    paths:
+      - 'scripts/carve_super.py'
+      - '.github/workflows/carve-tests.yml'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Dry-run and carve synthetic image
+        run: |
+          python -m py_compile scripts/carve_super.py
+          python - <<'PY'
+          from pathlib import Path
+          import json
+          Path('/tmp/super.pak').write_bytes(b'A'*512+b'B'*512)
+          Path('/tmp/plan.json').write_text(json.dumps({'sector_size':512,'partitions':[{'name':'second','start_sector':1,'sector_count':1}]}))
+          PY
+          python scripts/carve_super.py --super /tmp/super.pak --plan /tmp/plan.json --outdir /tmp/parts
+          test ! -d /tmp/parts
+          python scripts/carve_super.py --super /tmp/super.pak --plan /tmp/plan.json --outdir /tmp/parts --execute
+          python - <<'PY'
+          from pathlib import Path
+          assert Path('/tmp/parts/second.img').read_bytes()==b'B'*512
+          PY
