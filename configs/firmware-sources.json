@@ -1,0 +1,32 @@
+{
+  "schema": 1,
+  "targets": [
+    {
+      "id": "c1",
+      "model": "OLED65C1PTB",
+      "role": "baseline",
+      "support_page": "https://www.lg.com/bd/support/product/lg-OLED65C1PTB.ATC",
+      "version_hint": "03.53.45",
+      "download_url": null,
+      "sha256": null
+    },
+    {
+      "id": "c5",
+      "model": "OLED55C5PUA",
+      "role": "donor-webos25",
+      "support_page": "https://www.lg.com/us/support/product/lg-OLED55C5PUA.AUS",
+      "version_hint": null,
+      "download_url": null,
+      "sha256": null
+    },
+    {
+      "id": "c6",
+      "model": "OLED65C6PSA",
+      "role": "donor-webos26",
+      "support_page": "https://www.lg.com/au/support/product-support/cs-OLED65C6PSA.AAU/",
+      "version_hint": null,
+      "download_url": null,
+      "sha256": null
+    }
+  ]
+}
