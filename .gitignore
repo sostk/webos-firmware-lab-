@@ -1,0 +1,11 @@
+firmware/
+downloads/
+extracted/
+*.epk
+*.pak
+*.img
+*.squashfs
+*.bin
+*.zip
+__pycache__/
+.pytest_cache/
