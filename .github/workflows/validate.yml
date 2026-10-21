@@ -1,0 +1,24 @@
+name: Validate research tools
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test inventory comparison
+        run: |
+          mkdir -p /tmp/fwlab/a /tmp/fwlab/b
+          echo original > /tmp/fwlab/a/example
+          echo modified > /tmp/fwlab/b/example
+          python scripts/inventory.py /tmp/fwlab/a --out /tmp/fwlab/a.json
+          python scripts/inventory.py /tmp/fwlab/b --out /tmp/fwlab/b.json
+          python scripts/compare.py /tmp/fwlab/a.json /tmp/fwlab/b.json --out /tmp/fwlab/diff.json
+          python -c 'import json; assert json.load(open("/tmp/fwlab/diff.json"))["changed"] == ["example"]'
