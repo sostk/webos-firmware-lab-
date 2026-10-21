@@ -1,0 +1,30 @@
+name: Test ZIP inspection
+on:
+  push:
+    paths:
+      - 'scripts/inspect_zip.py'
+      - '.github/workflows/zip-inspection-tests.yml'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test with synthetic ZIP
+        run: |
+          python - <<'PY'
+          import zipfile
+          with zipfile.ZipFile('/tmp/example.zip','w') as z: z.writestr('firmware.epk',b'test')
+          PY
+          python scripts/inspect_zip.py /tmp/example.zip --out /tmp/zip-report.json
+          python - <<'PY'
+          import json
+          d=json.load(open('/tmp/zip-report.json'))
+          assert d['entries'][0]['name']=='firmware.epk'
+          PY
