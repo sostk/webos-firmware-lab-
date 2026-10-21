@@ -1,0 +1,45 @@
+name: Test EPK extractor compatibility (all models)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: firmware-extractor-compatibility
+  cancel-in-progress: false
+jobs:
+  compatibility:
+    runs-on: ubuntu-latest
+    timeout-minutes: 110
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        target: [c1, c5, c6]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install extractor build dependencies
+        run: sudo apt-get update && sudo apt-get install -y build-essential cmake liblzo2-dev libssl-dev zlib1g-dev
+      - name: Checkout pinned upstream extractor
+        run: |
+          git clone https://github.com/openlgtv/epk2extract.git /tmp/epk2extract
+          cd /tmp/epk2extract
+          git checkout --detach 2b6af078b56dbedb89efc0f4943036150f1ecae9
+          test "$(git rev-parse HEAD)" = "2b6af078b56dbedb89efc0f4943036150f1ecae9"
+      - name: Build extractor
+        run: |
+          cmake -S /tmp/epk2extract -B /tmp/epk2extract-build -DCMAKE_BUILD_TYPE=Release
+          cmake --build /tmp/epk2extract-build -j 2
+          find /tmp/epk2extract-build -type f -name epk2extract -executable -print
+      - name: Run bounded no-key compatibility test
+        run: |
+          binary="$(find /tmp/epk2extract-build -type f -name epk2extract -executable -print -quit)"
+          test -n "$binary"
+          python3 scripts/ci_extractor_test.py --target "${{ matrix.target }}" --extractor "$binary" --revision 2b6af078b56dbedb89efc0f4943036150f1ecae9 --out extractor-report
+      - name: Upload metadata report only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: extractor-compatibility-${{ matrix.target }}
+          path: extractor-report/compatibility.json
+          if-no-files-found: warn
+          retention-days: 14
