@@ -1,0 +1,36 @@
+name: Probe secured EPK headers
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: Firmware target
+        required: true
+        type: choice
+        options:
+          - c1
+          - c5
+          - c6
+permissions:
+  contents: read
+concurrency:
+  group: firmware-epk-probe
+  cancel-in-progress: false
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Inspect EPK header (read-only)
+        run: python3 scripts/ci_epk_probe.py --target "${{ inputs.target }}" --out epk-output
+      - name: Publish metadata JSON only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: epk-header-${{ inputs.target }}
+          path: epk-output/epk-probe.json
+          if-no-files-found: warn
+          retention-days: 14
