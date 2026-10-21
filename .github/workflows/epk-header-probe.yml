@@ -1,15 +1,6 @@
-name: Probe secured EPK headers
+name: Probe secured EPK headers (all models)
 on:
   workflow_dispatch:
-    inputs:
-      target:
-        description: Firmware target
-        required: true
-        type: choice
-        options:
-          - c1
-          - c5
-          - c6
 permissions:
   contents: read
 concurrency:
@@ -19,18 +10,23 @@ jobs:
   probe:
     runs-on: ubuntu-latest
     timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        target: [c1, c5, c6]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - name: Inspect EPK header (read-only)
-        run: python3 scripts/ci_epk_probe.py --target "${{ inputs.target }}" --out epk-output
+        run: python3 scripts/ci_epk_probe.py --target "${{ matrix.target }}" --out epk-output
       - name: Publish metadata JSON only
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: epk-header-${{ inputs.target }}
+          name: epk-header-${{ matrix.target }}
           path: epk-output/epk-probe.json
           if-no-files-found: warn
           retention-days: 14
