@@ -1,0 +1,36 @@
+name: Test binary analysis helpers
+on:
+  push:
+    paths:
+      - 'scripts/elf_inventory.py'
+      - 'scripts/partition_layout.py'
+      - '.github/workflows/analysis-tests.yml'
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Test ELF and partition parsers
+        run: |
+          python -m py_compile scripts/elf_inventory.py scripts/partition_layout.py
+          mkdir -p /tmp/fwlab
+          python - <<'PY'
+          from pathlib import Path
+          p=Path('/tmp/fwlab')
+          p.joinpath('arm.elf').write_bytes(b'\x7fELF'+bytes([1,1,1])+bytes(9)+bytes([2,0,40,0])+bytes(44))
+          p.joinpath('dpmeta.txt').write_text('0 100 linear /dev/block/super 2048')
+          PY
+          python scripts/elf_inventory.py /tmp/fwlab --out /tmp/elf.json
+          python scripts/partition_layout.py /tmp/fwlab/dpmeta.txt --out /tmp/layout.json
+          python - <<'PY'
+          import json
+          assert json.load(open('/tmp/elf.json'))['elf_files'][0]['architecture']=='ARM'
+          assert json.load(open('/tmp/layout.json'))['extents'][0]['physical_start_sector']==2048
+          PY
