@@ -5,28 +5,31 @@
       "id": "c1",
       "model": "OLED65C1PTB",
       "role": "baseline",
-      "support_page": "https://www.lg.com/bd/support/product/lg-OLED65C1PTB.ATC",
+      "support_page": "https://www.lg.com/np/support/product/lg-OLED65C1PTB.UTBPLJK",
       "version_hint": "03.53.45",
-      "download_url": null,
-      "sha256": null
+      "download_url": "https://gscs-b2c.lge.com/downloadFile?fileId=dF7Mfyvpt3Odr6eAlAwXjA",
+      "sha256": null,
+      "source_note": "User-supplied direct LG URL; actual archive and region compatibility unverified"
     },
     {
       "id": "c5",
       "model": "OLED55C5PUA",
       "role": "donor-webos25",
       "support_page": "https://www.lg.com/us/support/product/lg-OLED55C5PUA.AUS",
-      "version_hint": null,
-      "download_url": null,
-      "sha256": null
+      "version_hint": "33.31.69",
+      "download_url": "https://gscs-b2c.lge.com/downloadFile?fileId=YUcQx5IM9MYE8X25YkNnDw",
+      "sha256": null,
+      "source_note": "User-supplied direct LG URL; archive/model version unverified"
     },
     {
       "id": "c6",
       "model": "OLED65C6PSA",
       "role": "donor-webos26",
-      "support_page": "https://www.lg.com/au/support/product-support/cs-OLED65C6PSA.AAU/",
-      "version_hint": null,
-      "download_url": null,
-      "sha256": null
+      "support_page": "https://www.lg.com/au/support/product-support/cs-OLED65C6PSA.AAU",
+      "version_hint": "43.21.79",
+      "download_url": "https://gscs-b2c.lge.com/downloadFile?fileId=qxXNb2n67wmWZ9XHw687pg",
+      "sha256": null,
+      "source_note": "User-supplied direct LG URL; archive/model version unverified"
     }
   ]
 }
